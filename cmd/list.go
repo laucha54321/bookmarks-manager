@@ -5,6 +5,8 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"strings"
 
@@ -37,33 +39,41 @@ func init() {
 		fmt.Println(err.Error())
 	}
 
-	doc, err := html.Parse(strings.NewReader(string(file)))
+	doc := html.NewTokenizer(strings.NewReader(string(file)))
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 
-	var links []string
-	var link func(*html.Node)
-	link = func(n *html.Node) {
-		if n.Type == html.ElementNode && n.Data == "a" {
-			for _, a := range n.Attr {
-				if a.Key == "href" {
-					// adds a new link entry when the attribute matches
-					links = append(links, a.Val)
-				}
+	for {
+		//get the next token type
+		tokenType := doc.Next()
+
+		//if it's an error token, we either reached
+		//the end of the file, or the HTML was malformed
+		if tokenType == html.ErrorToken {
+			err := doc.Err()
+			if err == io.EOF {
+				//end of the file, break out of the loop
+				break
+			}
+			//otherwise, there was an error tokenizing,
+			//which likely means the HTML was malformed.
+			//since this is a simple command-line utility,
+			//we can just use log.Fatalf() to report the error
+			//and exit the process with a non-zero status code
+			log.Fatalf("error tokenizing HTML: %v", doc.Err())
+		}
+
+		//process the token according to the token type...
+		if tokenType == html.StartTagToken {
+			token := doc.Token()
+			if token.Data == "a" {
+				fmt.Println(token.Attr[0].Val)
+				tokenType = doc.Next()
+				fmt.Println(doc.Token())
 			}
 		}
 
-		// traverses the HTML of the webpage from the first child node
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			link(c)
-		}
-	}
-	link(doc)
-
-	// loops through the links slice
-	for _, l := range links {
-		fmt.Println("Link:", l)
 	}
 
 	// Here you will define your flags and configuration settings.
