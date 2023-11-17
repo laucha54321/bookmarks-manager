@@ -5,10 +5,8 @@ package main
 
 import (
 	"bookmarks-manager/cmd"
-	"fmt"
 )
 
 func main() {
 	cmd.Execute()
-	fmt.Println("Hello World")
 }
