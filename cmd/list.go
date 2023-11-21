@@ -28,7 +28,7 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 
 	// Here you will define your flags and configuration settings.
-	fnbookmark.ListFunction()
+	fnbookmark.List(fnbookmark.ParseList())
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	// listCmd.PersistentFlags().String("foo", "", "A help for foo")

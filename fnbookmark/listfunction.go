@@ -12,8 +12,9 @@ import (
 )
 
 type bookmark struct {
-	URL   string
-	title string
+	URL      string
+	title    string
+	ICON_URI string
 }
 
 type bookmarkList struct {
@@ -22,11 +23,11 @@ type bookmarkList struct {
 }
 
 // parsing the html file
-func ListFunction() {
+func ParseList() []bookmark {
 
 	var list []bookmark
 
-	file, err := os.ReadFile("./bookmarks.html")
+	file, err := os.ReadFile("./brave.html")
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -65,16 +66,17 @@ func ListFunction() {
 				aux.title = doc.Token().Data
 				list = append(list, aux)
 			} else if token.Data == "a" {
-				aux := bookmark{URL: token.Attr[0].Val}
+				aux := bookmark{URL: token.Attr[0].Val, ICON_URI: token.Attr[2].Val}
 				tokenType = doc.Next()
 				aux.title = doc.Token().Data
 				list = append(list, aux)
+				fmt.Println(aux)
 			}
 
 		}
 
 	}
-	List(list)
+	return list
 }
 
 // List the bookmarks to the console(after parsing).
